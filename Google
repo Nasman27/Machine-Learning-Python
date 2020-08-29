@@ -1,0 +1,57 @@
+import pandas as pd 
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+data5=pd.read_csv('GOOGL-copy1.csv')
+data5.head()
+	Date	Open	High	Low	Close	Adj Close	Volume
+0	2009-05-22	198.528534	199.524521	196.196198	196.946945	196.946945	3433700
+1	2009-05-26	196.171173	202.702698	195.195190	202.382385	202.382385	6202700
+2	2009-05-27	203.023026	206.136139	202.607605	202.982986	202.982986	6062500
+3	2009-05-28	204.544540	206.016022	202.507507	205.405411	205.405411	5332200
+4	2009-05-29	206.261261	208.823822	205.555557	208.823822	208.823822	5291100
+
+create two arrays, x and y. x being input cols and y being output/target variable
+we want to predict the high value from the other columns
+X= data5[['Open','Low','Close','Volume']]
+y=data5['High']
+
+Now to do split train test model technique
+
+from sklearn.model_selection import train_test_split
+
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size =0.4, random_state =101)
+
+Now  from sklearn get linear model and import linear regression
+from sklearn.linear_model import LinearRegression
+lm = LinearRegression()
+lm.fit(X_train,y_train)
+#get intercept and coefficients
+print(lm.intercept_)
+-1.5217607262211459
+coeff_df = pd.DataFrame(lm.coef_, X.columns,columns=(['Coefficient']))
+coeff_df
+Coefficient
+Open	6.669326e-01
+Low	-3.161357e-01
+Close	6.555617e-01
+Volume	2.460869e-07
+Now we see the intecept and coefficients. we have an idea about our data and how it will turn out. Lets test our model.
+
+predictions = lm.predict(X_test)
+plt.scatter(y_test,predictions)
+
+Now we test our  model on the standard model evaluation methods 
+
+from sklearn import metrics
+print('MSR : ', metrics.mean_squared_error(y_test,predictions))
+print('MAE : ', metrics.mean_absolute_error(y_test,predictions))
+print('RMSR : ', np.sqrt(metrics.mean_squared_error(y_test,predictions)))
+MSR :  7.3751224156665565
+MAE :  1.8000796794738239
+RMSR :  2.71571766125762
+sns.distplot((y_test-predictions))
+The above histogram of the residuals is showing a normal distribution. This indicates that the linear regression was the correct choice for this Google dataset.
+A critque of this model that I would like to mention is the overfitting. The dataset is clean and only the relevant columns are included. However this could result in some bias that we need to acknowledge. 
